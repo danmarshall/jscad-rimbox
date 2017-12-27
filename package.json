@@ -1,0 +1,27 @@
+{
+  "name": "jscad-rimbox",
+  "version": "1.0.0",
+  "description": "A parametric box with round corners and a bolt hole in each corner.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danmarshall/jscad-rimbox.git"
+  },
+  "keywords": [
+    "jscad"
+  ],
+  "author": "Dan Marshall",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danmarshall/jscad-rimbox/issues"
+  },
+  "homepage": "https://github.com/danmarshall/jscad-rimbox#readme",
+  "dependencies": {
+    "@jscad/csg": "^0.3.7",
+    "makerjs": "^0.9.77",
+    "makerjs-rimbox": "^1.1.5"
+  }
+}
