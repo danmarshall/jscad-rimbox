@@ -3,21 +3,21 @@ var rimbox = require('makerjs-rimbox');
 var { CAG, CSG } = require('@jscad/csg');
 
 function main(params) {
-    var lidDiff = params.lidHoleRadius - params.bodyHoleRadius;
-
     var side = new rimbox(params.boltX, params.boltY, params.bodyHoleRadius, params.wallThickness);
     var bottom = new rimbox(params.boltX, params.boltY, params.bodyHoleRadius, params.wallThickness, true);
-    var lid = new rimbox(params.boltX, params.boltY, params.lidHoleRadius, params.wallThickness - lidDiff);
+    var lid = new rimbox(params.boltX, params.boltY, params.bodyHoleRadius, params.wallThickness);
     var lidInset = makerjs.model.outline(lid.models.inner, params.lidInsetClearance, 0, true);
 
     delete lid.models.inner;
+    delete lid.models.bolts;
+    lid.models.bolts = new makerjs.models.BoltRectangle(params.boltX, params.boltY, params.lidHoleRadius);
 
     if (!params.holeThroughBottom) {
         delete bottom.models.bolts;
     }
 
     var m = makerjs.measure.modelExtents(side);
-    lid.origin = [m.high[0] + params.lidHoleRadius, 0];
+    lid.origin = [m.high[0] - m.low[0] + params.lidHoleRadius, 0];
     lidInset.origin = lid.origin;
 
     var side3D = makerjs.exporter.toJscadCSG(CAG, side, { extrude: params.depth, maxArcFacet: params.maxArcFacet });
