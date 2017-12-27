@@ -20,6 +20,18 @@ function main(params) {
     lid.origin = [m.high[0] - m.low[0] + params.lidHoleRadius, 0];
     lidInset.origin = lid.origin;
 
+    var model = {
+        models: {
+            side,
+            bottom,
+            lid,
+            lidInset
+        }
+    };
+
+    makerjs.model.center(model);
+    makerjs.model.originate(model);
+
     var side3D = makerjs.exporter.toJscadCSG(CAG, side, { extrude: params.depth, maxArcFacet: params.maxArcFacet });
     var bottom3D = makerjs.exporter.toJscadCSG(CAG, bottom, { extrude: params.bottomThickness, maxArcFacet: params.maxArcFacet });
     var lid3D = makerjs.exporter.toJscadCSG(CAG, lid, { extrude: params.lidThickness, maxArcFacet: params.maxArcFacet });
