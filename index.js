@@ -7,37 +7,48 @@ function main(params) {
     var bottom = new rimbox(params.boltX, params.boltY, params.bodyHoleRadius, params.wallThickness, true);
     var lid = new rimbox(params.boltX, params.boltY, params.bodyHoleRadius, params.wallThickness);
     var lidInset = makerjs.model.outline(lid.models.inner, params.lidInsetClearance, 0, true);
+    var lidBolts = new makerjs.models.BoltRectangle(params.boltX, params.boltY, params.lidHoleRadius);
 
     delete lid.models.inner;
     delete lid.models.bolts;
-    lid.models.bolts = new makerjs.models.BoltRectangle(params.boltX, params.boltY, params.lidHoleRadius);
 
     if (!params.holeThroughBottom) {
         delete bottom.models.bolts;
     }
 
     var m = makerjs.measure.modelExtents(side);
-    lid.origin = [m.high[0] - m.low[0] + params.lidHoleRadius, 0];
-    lidInset.origin = lid.origin;
+    lid.origin = lidInset.origin = lidBolts.origin = [m.high[0] - m.low[0] + params.lidHoleRadius, 0];
 
-    var model = {
+    var all = {
         models: {
             side,
             bottom,
             lid,
+            lidBolts,
             lidInset
         }
     };
 
-    makerjs.model.center(model);
-    makerjs.model.originate(model);
+    makerjs.model.center(all);
+    makerjs.model.originate(all);
 
-    var side3D = makerjs.exporter.toJscadCSG(CAG, side, { extrude: params.depth, maxArcFacet: params.maxArcFacet });
-    var bottom3D = makerjs.exporter.toJscadCSG(CAG, bottom, { extrude: params.bottomThickness, maxArcFacet: params.maxArcFacet });
-    var lid3D = makerjs.exporter.toJscadCSG(CAG, lid, { extrude: params.lidThickness, maxArcFacet: params.maxArcFacet });
-    var lidInset3D = makerjs.exporter.toJscadCSG(CAG, lidInset, { extrude: params.lidInsetThickness, z: params.lidThickness, maxArcFacet: params.maxArcFacet });
+    function extrude(model, depth, z) {
+        return makerjs.exporter.toJscadCSG(CAG, model, { extrude: depth, maxArcFacet: params.maxArcFacet, z });
+    }
 
-    return bottom3D.union(side3D).union(lid3D).union(lidInset3D);
+    var side3D = extrude(side, params.depth);
+    var bottom3D = extrude(bottom, params.bottomThickness);
+    var lid3D = extrude(lid, params.lidThickness);
+
+    if (params.lidInsetThickness > 0) {
+        var lidInset3D = extrude(lidInset, params.lidInsetThickness, params.lidThickness);
+        lid3D = lid3D.union(lidInset3D);
+    }
+
+    var lidBolts3D = extrude(lidBolts, params.lidThickness + params.lidInsetThickness);
+    lid3D = lid3D.subtract(lidBolts3D);
+
+    return bottom3D.union(side3D).union(lid3D);
 }
 
 function getParameterDefinitions() {
